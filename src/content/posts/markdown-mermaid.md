@@ -1,11 +1,24 @@
 ---
 title: Markdown Mermaid 图表
-published: 1970-01-01
+published: 1970-01-01T00:00:00.000Z
 pinned: false
 description: 一个包含 Mermaid 的 Markdown 博客文章简单示例。
-tags: [Markdown, 博客, Mermaid, Firefly]
+tags:
+  - Markdown
+  - 博客
+  - Mermaid
+  - Firefly
 category: 文章示例
 draft: false
+ai: >-
+  Mermaid 是 Markdown 中创建图表的强大工具，通过代码块指定 `mermaid` 语言，使用简洁文本语法描述图表，Mermaid
+  会自动渲染成美观可视化图表。
+
+
+  本文演示了流程图（表示算法步骤）、时序图（显示对象交互）、甘特图（显示项目进度）、类图（展示静态结构和关系）、状态图（展示生命周期状态）以及饼图（显示比例和百分比）。这些图表能清晰表达复杂概念、流程和数据结构。
+
+
+  建议在技术博客或项目文档中尝试 Mermaid，它们能让内容更专业且易懂。
 ---
 ## Markdown 中 Mermaid 图表完整指南
 

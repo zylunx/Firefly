@@ -1,10 +1,20 @@
 ---
 title: Markdown PlantUML 图表
-published: 1970-01-01
+published: 1970-01-01T00:00:00.000Z
 description: 用于验证 Firefly 中 PlantUML 插件渲染、主题切换与交互能力的示例文章。
-tags: [PlantUML, Firefly, Markdown]
+tags:
+  - PlantUML
+  - Firefly
+  - Markdown
 category: 文章示例
 draft: false
+ai: >-
+  PlantUML
+  是一种纯文本语法工具，可生成时序图、类图、用例图、活动图等工程图表，特别适合技术博客和项目文档：图表与正文统一版本管理，便于协作与迭代；修改只需改文本，且能无缝嵌入
+  Markdown。Firefly 中代码块在构建阶段生成服务器 SVG，页面端自动根据亮暗主题切换图源，并支持缩放、拖拽和全屏。
+
+
+  （共约 140 字）
 ---
 
 ## Markdown 中 PlantUML 图表指南

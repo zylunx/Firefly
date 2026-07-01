@@ -1,9 +1,14 @@
 ---
 title: 草稿示例
-published: 1970-01-01
-tags: [Markdown, 博客, 演示]
+published: 1970-01-01T00:00:00.000Z
+tags:
+  - Markdown
+  - 博客
+  - 演示
 category: 文章示例
 draft: true
+ai: >-
+  这篇文章是草稿，尚未发布，对普通读者不可见。内容仍在进行中，可能需要编辑和审查。当准备发布时，在Frontmatter中将“draft”字段更新为“false”。
 ---
 
 # 这篇文章是草稿

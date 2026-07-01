@@ -1,15 +1,23 @@
 ---
 title: Markdown 教程
-published: 1970-01-01
+published: 1970-01-01T00:00:00.000Z
 pinned: false
 description: 一个简明的 Markdown 博客示例。
-tags: [Markdown, 文章示例]
+tags:
+  - Markdown
+  - 文章示例
 category: 文章示例
-licenseName: "未授权"
+licenseName: 未授权
 author: emn178
-sourceLink: "https://github.com/emn178/markdown"
+sourceLink: 'https://github.com/emn178/markdown'
 draft: false
+ai: >-
+  Markdown 支持块级元素（段落、标题、引用、列表、代码块、分割线、表格）、内联元素（链接、强调、行内代码、图片、删除线）、自动链接、反斜杠转义和内联
+  HTML。
 
+
+  段落用空行分隔，换行需行末两空格；标题有 Setext（=/- 下划线）和 ATX（# 数量决定级别）；引用用 >，可嵌套；列表用 -/+/* 或
+  1.，列表项内支持引用与代码块。
 ---
 
 这是一个展示如何编写 Markdown 文件的示例。本文档汇总了核心语法与常见扩展（GFM）。

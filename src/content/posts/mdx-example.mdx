@@ -1,11 +1,25 @@
 ---
 title: MDX 格式文章示例
-published: 1970-01-02
+published: 1970-01-02T00:00:00.000Z
 description: 这是一个 MDX 格式的示例文章，展示了如何在 Markdown 中使用 JSX。
-tags: [MDX, Markdown, 文章示例]
+tags:
+  - MDX
+  - Markdown
+  - 文章示例
 category: 文章示例
 draft: false
 image: api
+ai: >-
+  Markdown 和 MDX 是 Astro 文章的两种写作格式。Markdown（MD）提供纯文本轻量语法，适合简单文档；MDX 则支持在
+  Markdown 中无缝插入 JSX，嵌入 React 组件，实现丰富交互。
+
+
+  对比表总结：两者均支持 CommonMark 和 HTML，MDX 独有组件导入、JS
+  表达式动态数据，以及更灵活的样式定制（className/CSS-in-JS）。
+
+
+  使用示例包括图标组件、HTML/JSX 块及动态变量（如 {year}），推荐复杂需求时选 MDX，简单内容用 Markdown 即可。更多细节参阅 MDX
+  文档。
 ---
 
 import { Icon } from 'astro-icon/components'

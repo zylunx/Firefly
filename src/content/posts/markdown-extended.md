@@ -1,12 +1,33 @@
 ---
 title: Markdown 扩展功能
-published: 1970-01-01
-updated: 1970-01-01
-description: "了解 Firefly 中的 Markdown 功能"
-image: ""
-tags: [演示, 示例, Markdown, Firefly]
-category: "文章示例"
+published: 1970-01-01T00:00:00.000Z
+updated: 1970-01-01T00:00:00.000Z
+description: 了解 Firefly 中的 Markdown 功能
+image: ''
+tags:
+  - 演示
+  - 示例
+  - Markdown
+  - Firefly
+category: 文章示例
 draft: false
+ai: >-
+  **GitHub 仓库卡片**  
+
+  可添加动态 GitHub 仓库卡片，页面加载时自动从 GitHub API 获取信息。使用
+  `::github{repo="CuteLeaf/Firefly"}` 代码实现。
+
+
+  **提醒框（Admonitions）配置**  
+
+  采用 `rehype-callouts` 插件，支持四种主题风格：GitHub、Obsidian、VitePress、Docusaurus。可在
+  `admonitions` 配置中自定义。更改后需重启开发服务器生效。每个主题提供不同类型和语法示例。
+
+
+  **图片画廊网格（Image Grid）**  
+
+  使用 `grid` 和 `![]()`
+  标签实现多图纵向并排展示（最多4张）。自动响应式布局，同一排图片会按高度/比例自动撑满，短图自动裁剪补充视野。图注恒定底端对齐。
 ---
 
 ## GitHub 仓库卡片

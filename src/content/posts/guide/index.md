@@ -1,12 +1,20 @@
 ---
 title: Firefly 简单使用指南
-published: 1970-01-02
+published: 1970-01-02T00:00:00.000Z
 pinned: true
-description: "如何使用 Firefly 博客模板。"
-image: "./cover.avif"
-tags: ["Firefly", "博客", "Markdown", "使用指南"]
+description: 如何使用 Firefly 博客模板。
+image: ./cover.avif
+tags:
+  - Firefly
+  - 博客
+  - Markdown
+  - 使用指南
 category: 博客指南
 draft: false
+ai: >-
+  这个博客模板基于 Astro 构建。文章使用 Front-matter
+  字段定义标题、发布日期、更新日期、是否置顶、描述、封面图片、标签、分类、语言、许可证、作者、来源、是否草稿、评论启用、自定义 URL
+  和密码保护。文章文件放置在 /content 目录，可建子目录。Slug 用于自定义 URL 路径（未设置则用文件名）。
 ---
 
 

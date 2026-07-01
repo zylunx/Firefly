@@ -1,11 +1,20 @@
 ---
 title: KaTeX 数学公式示例
-published: 1970-01-02
+published: 1970-01-02T00:00:00.000Z
 description: 展示 Firefly 主题对 KaTeX 数学公式的支持，包括行内公式、块级公式和复杂数学符号。
-tags: [KaTeX, Math, 示例]
+tags:
+  - KaTeX
+  - Math
+  - 示例
 category: 文章示例
 draft: false
 image: api
+ai: >-
+  Firefly 主题全面支持 KaTeX 数学公式渲染，行内公式用单 $ 包裹（如 $e^{i\pi} = 0$ 和 $E = mc^2$），块级公式用双
+  $$ 包裹并居中显示（如 $\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$ 和质能方程）。  
+
+
+  复杂示例包括矩阵乘法、无穷级数求和、洛必达法则极限、麦克斯韦方程组、化学反应式及更多希腊字母、箭头和偏导符号。完整语法请参阅 KaTeX 官方文档。
 ---
 
 本文展示了 [Firefly](https://github.com/CuteLeaf/Firefly) 主题对 KaTeX 数学公式的渲染支持。

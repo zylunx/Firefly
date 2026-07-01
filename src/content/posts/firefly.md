@@ -1,12 +1,23 @@
 ---
 title: Firefly 一款清新美观的 Astro 博客主题模板
-published: 1970-01-02
+published: 1970-01-02T00:00:00.000Z
 pinned: true
-description: Firefly 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。
-tags: [Markdown, Firefly, 博客, 主题, 模板]
+description: >-
+  Firefly 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代
+  Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。
+tags:
+  - Markdown
+  - Firefly
+  - 博客
+  - 主题
+  - 模板
 category: 文章示例
 draft: false
 image: ./images/firefly2.avif
+ai: >-
+  Firefly 是一款基于 Astro 框架和 Fuwari 模板开发的现代个人博客主题模板，专为技术爱好者和内容创作者设计，融合 TypeScript
+  支持、Tailwind CSS 响应式设计及组件化开发，提供静态站点生成、优秀 SEO 优化和高度可定制的界面。用户可通过在线预览、官方博客及 GitHub
+  获取快速上手，结合详细配置文档轻松打造专业博客网站。
 ---
 
 ## 🌟 项目概述
