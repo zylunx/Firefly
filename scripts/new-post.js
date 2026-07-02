@@ -50,7 +50,9 @@ image: ''
 tags: []
 category: ''
 draft: false 
-lang: ''
+pinned: false
+slug: ${args[0]}
+
 ---
 `
 
