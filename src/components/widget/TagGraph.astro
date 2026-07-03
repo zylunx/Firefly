@@ -1,0 +1,383 @@
+---
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import type { TagGraphData } from "@/utils/tag-graph-data";
+
+interface Props {
+	data: TagGraphData;
+	class?: string;
+}
+
+const { data, class: className } = Astro.props;
+
+const { nodes, links, threshold } = data;
+
+// 节点分类：高频 (>=5)、常用 (>=2)、低频 (<2)
+const highFreq = nodes.filter((n) => n.value >= 5).length;
+const commonFreq = nodes.filter((n) => n.value >= 2 && n.value < 5).length;
+const lowFreq = nodes.filter((n) => n.value < 2).length;
+
+const title = i18n(I18nKey.tagGraphTitle);
+const countText = i18n(I18nKey.tagGraphCount).replace(
+	"{count}",
+	String(nodes.length),
+);
+
+const texts = {
+	title: title,
+	countText: countText,
+	highFrequencyTag: i18n(I18nKey.highFrequencyTag),
+	commonTag: i18n(I18nKey.commonTag),
+	lowFrequencyTag: i18n(I18nKey.lowFrequencyTag),
+	postsCountUnit: i18n(I18nKey.postsCount),
+};
+
+// 序列化数据传给客户端
+const graphNodes = nodes.map((n) => ({
+	id: n.id,
+	name: n.name,
+	value: n.value,
+	url: n.url,
+	posts: n.posts.map((p) => ({ id: p.id, title: p.title })),
+}));
+const graphLinks = links.map((l) => ({
+	source: l.source,
+	target: l.target,
+	value: l.value,
+}));
+const legendStats = { high: highFreq, common: commonFreq, low: lowFreq };
+---
+
+<div class:list={["tag-graph", className]}>
+	<div class="tag-graph__header">
+		<h2 class="tag-graph__title">{title}</h2>
+		<span class="tag-graph__count">{countText}</span>
+	</div>
+
+	{nodes.length === 0 ? (
+		<div class="tag-graph__empty">{i18n(I18nKey.noData)}</div>
+	) : (
+		<>
+			<div class="tag-graph__legend" aria-hidden="true">
+				<span class="tag-graph__legend-item">
+					<span
+						class="tag-graph__legend-dot"
+						style="background:#fb7185"
+					></span>
+					{texts.highFrequencyTag} · {legendStats.high}
+				</span>
+				<span class="tag-graph__legend-item">
+					<span
+						class="tag-graph__legend-dot"
+						style="background:#fbbf24"
+					></span>
+					{texts.commonTag} · {legendStats.common}
+				</span>
+				<span class="tag-graph__legend-item">
+					<span
+						class="tag-graph__legend-dot"
+						style="background:#94a3b8"
+					></span>
+					{texts.lowFrequencyTag} · {legendStats.low}
+				</span>
+			</div>
+			<div
+				id="tag-graph-chart"
+				class="tag-graph__chart"
+				role="img"
+				aria-label={title}
+			></div>
+		</>
+	)}
+</div>
+
+<script is:inline define:vars={{ graphNodes, graphLinks, texts, threshold }}>
+	(function () {
+		var CHART_ID = "tag-graph-chart";
+		var ECHARTS_CDN =
+			"https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js";
+
+		// 暴露最新数据给持久的事件监听器
+		window.__tagGraphData = {
+			nodes: graphNodes,
+			links: graphLinks,
+			texts: texts,
+		};
+
+		function isDark() {
+			return document.documentElement.classList.contains("dark");
+		}
+
+		function getTextColor() {
+			return isDark() ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)";
+		}
+
+		function getNodeColor(value) {
+			// 高频 (>=5) 红、常用 (>=2) 黄、低频 (<2) 灰
+			if (value >= 5) return "#fb7185";
+			if (value >= 2) return "#fbbf24";
+			return "#94a3b8";
+		}
+
+		function nodeSymbolSize(value) {
+			// 24 ~ 78 px 之间，按 value 线性映射
+			var min = 24;
+			var max = 78;
+			var v = Math.max(1, value || 1);
+			// 用 sqrt 让小节点不至于过小
+			var scaled = Math.sqrt(v) * 14;
+			return Math.max(min, Math.min(max, scaled));
+		}
+
+		function buildOption(data) {
+			var nodes = data.nodes.map(function (n) {
+				return {
+					id: n.id,
+					name: n.name,
+					value: n.value,
+					url: n.url,
+					posts: n.posts,
+					symbolSize: nodeSymbolSize(n.value),
+					category: n.value >= 5 ? 0 : n.value >= 2 ? 1 : 2,
+					itemStyle: {
+						color: getNodeColor(n.value),
+						borderColor: isDark() ? "#1f1f1f" : "#ffffff",
+						borderWidth: 1.5,
+					},
+					label: {
+						show: true,
+						position: "right",
+						color: getTextColor(),
+						fontSize: 12,
+					},
+				};
+			});
+
+			var links = data.links.map(function (l) {
+				return {
+					source: l.source,
+					target: l.target,
+					value: l.value,
+					lineStyle: {
+						width: Math.max(1, Math.min(8, l.value)),
+						color: isDark()
+							? "rgba(255,255,255,0.18)"
+							: "rgba(0,0,0,0.15)",
+						curveness: 0.2,
+						opacity: 0.7,
+					},
+				};
+			});
+
+			return {
+				tooltip: {
+					formatter: function (params) {
+						if (!params) return "";
+						if (params.dataType === "edge") {
+							var v = params.data.value || 0;
+							return (
+								"<div style=\"font-size:12px\">" +
+								params.data.source +
+								" ↔ " +
+								params.data.target +
+								"</div>" +
+								"<div style=\"font-size:12px;opacity:0.85\">" +
+								v +
+								" " +
+								texts.postsCountUnit +
+								" 共现</div>"
+							);
+						}
+						var d = params.data || {};
+						var postsHtml = "";
+						if (d.posts && d.posts.length > 0) {
+							var items = d.posts
+								.slice(0, 5)
+								.map(function (p) {
+									return "<li style=\"margin:2px 0\">" + p.title + "</li>";
+								})
+								.join("");
+							postsHtml =
+								"<ul style=\"margin:6px 0 0 0;padding-left:18px;max-width:240px;white-space:normal;font-size:11px;opacity:0.85\">" +
+								items +
+								"</ul>";
+							if (d.posts.length > 5) {
+								postsHtml +=
+									"<div style=\"font-size:11px;opacity:0.7;margin-top:2px\">… " +
+									d.posts.length +
+									" 篇</div>";
+							}
+						}
+						return (
+							"<div style=\"font-weight:600;margin-bottom:4px\">" +
+							(d.name || "") +
+							"</div>" +
+							"<div style=\"font-size:12px;opacity:0.85\">" +
+							(d.value || 0) +
+							" " +
+							texts.postsCountUnit +
+							"</div>" +
+							postsHtml
+						);
+					},
+					backgroundColor: isDark()
+						? "rgba(30,30,30,0.92)"
+						: "rgba(255,255,255,0.96)",
+					borderColor: isDark()
+						? "rgba(255,255,255,0.12)"
+						: "rgba(0,0,0,0.12)",
+					borderWidth: 1,
+					textStyle: { color: getTextColor() },
+					extraCssText: "max-width:280px;white-space:normal;",
+				},
+				legend: {
+					data: [
+						texts.highFrequencyTag,
+						texts.commonTag,
+						texts.lowFrequencyTag,
+					],
+					textStyle: { color: getTextColor() },
+					top: 10,
+				},
+				series: [
+					{
+						type: "graph",
+						layout: "force",
+						roam: true,
+						draggable: true,
+						label: { show: true },
+						edgeSymbol: ["none", "none"],
+						focusNodeAdjacency: true,
+						emphasis: {
+							focus: "adjacency",
+							lineStyle: { width: 4, opacity: 1 },
+							label: { fontSize: 14, fontWeight: "bold" },
+							itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.3)" },
+						},
+						blur: {
+							itemStyle: { opacity: 0.15 },
+							lineStyle: { opacity: 0.05 },
+							label: { opacity: 0.15 },
+						},
+						force: {
+							repulsion: 220,
+							edgeLength: [60, 160],
+							gravity: 0.08,
+							layoutAnimation: true,
+						},
+						categories: [
+							{ name: texts.highFrequencyTag },
+							{ name: texts.commonTag },
+							{ name: texts.lowFrequencyTag },
+						],
+						data: nodes,
+						links: links,
+						lineStyle: { curveness: 0.2 },
+					},
+				],
+			};
+		}
+
+		function initTagGraph() {
+			var chartDom = document.getElementById(CHART_ID);
+			if (!chartDom) return;
+			var data = window.__tagGraphData;
+			if (!data || !data.nodes || data.nodes.length === 0) return;
+			if (!window.echarts) return;
+
+			// 销毁旧实例
+			destroyTagGraph();
+
+			var chart = window.echarts.init(chartDom);
+			chart.setOption(buildOption(data));
+
+			chart.on("click", function (params) {
+				if (params && params.dataType === "node" && params.data && params.data.url) {
+					window.location.href = params.data.url;
+				}
+			});
+
+			var resizeHandler = function () {
+				try {
+					chart.resize();
+				} catch (_e) {}
+			};
+			window.addEventListener("resize", resizeHandler);
+
+			// 主题切换监听
+			var observer = new MutationObserver(function () {
+				try {
+					chart.setOption(buildOption(data), true);
+				} catch (_e) {}
+			});
+			observer.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ["class"],
+			});
+
+			window.__tagGraphState = {
+				chart: chart,
+				observer: observer,
+				resizeHandler: resizeHandler,
+			};
+		}
+
+		function destroyTagGraph() {
+			var s = window.__tagGraphState;
+			if (!s) return;
+			try {
+				s.chart && s.chart.dispose();
+			} catch (_e) {}
+			s.observer && s.observer.disconnect();
+			if (s.resizeHandler) {
+				window.removeEventListener("resize", s.resizeHandler);
+			}
+			window.__tagGraphState = null;
+		}
+
+		function ensureEchartsThenInit() {
+			if (window.echarts) {
+				initTagGraph();
+				return;
+			}
+			if (window.__echartsLoading) {
+				return;
+			}
+			window.__echartsLoading = true;
+			var script = document.createElement("script");
+			script.src = ECHARTS_CDN;
+			script.async = true;
+			script.onload = function () {
+				window.__echartsLoading = false;
+				initTagGraph();
+			};
+			script.onerror = function () {
+				window.__echartsLoading = false;
+			};
+			document.head.appendChild(script);
+		}
+
+		// 仅绑定一次全局监听（与 CategoryRose 共享 echarts 加载状态）
+		if (!window.__tagGraphPageListenerBound) {
+			window.__tagGraphPageListenerBound = true;
+			document.addEventListener("astro:page-load", ensureEchartsThenInit);
+			document.addEventListener("swup:contentReplaced", ensureEchartsThenInit);
+			document.addEventListener("swup:willReplaceContent", destroyTagGraph);
+		}
+
+		// 立即尝试初始化
+		ensureEchartsThenInit();
+	})();
+</script>
+
+<style>
+	.tag-graph__empty {
+		text-align: center;
+		padding: 3rem 1rem;
+		color: rgba(120, 120, 120, 0.9);
+		font-size: 0.9rem;
+	}
+	:where(.dark) .tag-graph__empty {
+		color: rgba(200, 200, 200, 0.9);
+	}
+</style>

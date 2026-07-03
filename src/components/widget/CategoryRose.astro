@@ -1,0 +1,238 @@
+---
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import type { Category } from "@/utils/content-utils";
+
+interface Props {
+	categories: Category[];
+	class?: string;
+}
+
+const { categories, class: className } = Astro.props;
+
+const totalPosts = categories.reduce((sum, c) => sum + c.count, 0);
+
+// 文案，传入客户端脚本
+const texts = {
+	totalPostsLabel: i18n(I18nKey.totalPostsLabel).replace(
+		"{count}",
+		String(totalPosts),
+	),
+	postsCountUnit: i18n(I18nKey.postsCount),
+	noData: i18n(I18nKey.noData),
+};
+
+// 通过 define:vars 注入到内联脚本
+const chartData = categories.map((c) => ({
+	name: c.name,
+	count: c.count,
+	url: c.url,
+}));
+---
+
+<div class:list={["category-rose", className]}>
+	<div class="category-rose__layout">
+		<div id="category-rose-chart" class="category-rose__chart" role="img"
+			aria-label={i18n(I18nKey.categories)}></div>
+		<nav class="category-rose__list" aria-label={i18n(I18nKey.categories)}>
+			{chartData.map((c) => (
+				<a href={c.url} title={c.name}>
+					<span class="category-rose__name">{c.name}</span>
+					<span class="category-rose__count">{c.count}</span>
+				</a>
+			))}
+		</nav>
+	</div>
+	{chartData.length > 0 && (
+		<div class="category-rose__summary">{texts.totalPostsLabel}</div>
+	)}
+</div>
+
+<script is:inline define:vars={{ chartData, texts }}>
+	(function () {
+		var CHART_ID = "category-rose-chart";
+		var ECHARTS_CDN =
+			"https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js";
+
+		// 暴露最新数据给持久的事件监听器
+		window.__categoryRoseData = { chartData: chartData, texts: texts };
+
+		function isDark() {
+			return document.documentElement.classList.contains("dark");
+		}
+
+		function getTextColor() {
+			return isDark() ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.85)";
+		}
+
+		function getAxisLineColor() {
+			return isDark() ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+		}
+
+		function buildOption(data) {
+			var total = data.reduce(function (sum, item) {
+				return sum + item.count;
+			}, 0);
+			return {
+				tooltip: {
+					trigger: "item",
+					backgroundColor: isDark()
+						? "rgba(30,30,30,0.92)"
+						: "rgba(255,255,255,0.96)",
+					borderColor: getAxisLineColor(),
+					borderWidth: 1,
+					textStyle: { color: getTextColor() },
+					formatter: function (params) {
+						var pct = total > 0 ? ((params.value / total) * 100).toFixed(1) : "0";
+						return (
+							"<div style=\"font-weight:600;margin-bottom:4px\">" +
+							params.name +
+							"</div>" +
+							"<div style=\"font-size:12px;opacity:0.85\">" +
+							params.value +
+							" " +
+							texts.postsCountUnit +
+							" · " +
+							pct +
+							"%</div>"
+						);
+					},
+				},
+				series: [
+					{
+						name: "categories",
+						type: "pie",
+						radius: ["20%", "75%"],
+						roseType: "area",
+						avoidLabelOverlap: true,
+						itemStyle: {
+							borderRadius: 6,
+							borderColor: isDark() ? "#1f1f1f" : "#ffffff",
+							borderWidth: 2,
+						},
+						label: {
+							color: getTextColor(),
+							fontSize: 12,
+							formatter: "{b}",
+						},
+						labelLine: {
+							lineStyle: { color: getAxisLineColor() },
+							length: 8,
+							length2: 8,
+						},
+						emphasis: {
+							itemStyle: {
+								shadowBlur: 12,
+								shadowColor: "rgba(0,0,0,0.25)",
+							},
+							label: { fontSize: 14, fontWeight: "bold" },
+						},
+						data: data.map(function (item) {
+							return {
+								name: item.name,
+								value: item.count,
+								url: item.url,
+							};
+						}),
+						animationType: "scale",
+						animationEasing: "elasticOut",
+						animationDelay: function (idx) {
+							return idx * 100;
+						},
+					},
+				],
+			};
+		}
+
+		function initCategoryRose() {
+			var chartDom = document.getElementById(CHART_ID);
+			if (!chartDom) return;
+			var data = window.__categoryRoseData;
+			if (!data || !data.chartData || data.chartData.length === 0) return;
+			if (!window.echarts) return;
+
+			// 销毁旧实例
+			destroyCategoryRose();
+
+			var chart = window.echarts.init(chartDom);
+			chart.setOption(buildOption(data.chartData));
+
+			chart.on("click", function (params) {
+				if (params && params.data && params.data.url) {
+					window.location.href = params.data.url;
+				}
+			});
+
+			var resizeHandler = function () {
+				try {
+					chart.resize();
+				} catch (_e) {}
+			};
+			window.addEventListener("resize", resizeHandler);
+
+			// 主题切换监听
+			var observer = new MutationObserver(function () {
+				try {
+					chart.setOption(buildOption(data.chartData));
+				} catch (_e) {}
+			});
+			observer.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ["class"],
+			});
+
+			window.__categoryRoseState = {
+				chart: chart,
+				observer: observer,
+				resizeHandler: resizeHandler,
+			};
+		}
+
+		function destroyCategoryRose() {
+			var s = window.__categoryRoseState;
+			if (!s) return;
+			try {
+				s.chart && s.chart.dispose();
+			} catch (_e) {}
+			s.observer && s.observer.disconnect();
+			if (s.resizeHandler) {
+				window.removeEventListener("resize", s.resizeHandler);
+			}
+			window.__categoryRoseState = null;
+		}
+
+		function ensureEchartsThenInit() {
+			if (window.echarts) {
+				initCategoryRose();
+				return;
+			}
+			if (window.__echartsLoading) {
+				// 已在加载中，加载完成后会调用一次 init
+				return;
+			}
+			window.__echartsLoading = true;
+			var script = document.createElement("script");
+			script.src = ECHARTS_CDN;
+			script.async = true;
+			script.onload = function () {
+				window.__echartsLoading = false;
+				initCategoryRose();
+			};
+			script.onerror = function () {
+				window.__echartsLoading = false;
+			};
+			document.head.appendChild(script);
+		}
+
+		// 仅绑定一次全局监听
+		if (!window.__categoryRoseBound) {
+			window.__categoryRoseBound = true;
+			document.addEventListener("astro:page-load", ensureEchartsThenInit);
+			document.addEventListener("swup:contentReplaced", ensureEchartsThenInit);
+			document.addEventListener("swup:willReplaceContent", destroyCategoryRose);
+		}
+
+		// 立即尝试初始化
+		ensureEchartsThenInit();
+	})();
+</script>

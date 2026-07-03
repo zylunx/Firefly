@@ -6,23 +6,13 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getSortedPostsList } from "@/utils/content-utils";
 
 const sortedPostsList = await getSortedPostsList();
+const title = i18n(I18nKey.archive);
 ---
 
-<MainGridLayout title={i18n(I18nKey.archive)}>
-  <script is:inline>
-    (function() {
-      var p = new URLSearchParams(location.search);
-      var cat = p.get("category") || "";
-      var tag = p.get("tag") || "";
-      var unc = p.get("uncategorized");
-      var t = cat || (unc ? "未分类" : "") || (tag ? "#" + tag : "");
-      if (t) {
-        requestAnimationFrame(function() {
-          var el = document.querySelector(".banner-page-title-text");
-          if (el) el.textContent = t;
-        });
-      }
-    })();
-  </script>
-  <ArchivePanel sortedPosts={sortedPostsList} client:only="svelte" />
+<MainGridLayout title={title}>
+  <div class="w-full py-4 md:py-6 relative">
+    <!-- 页面标题区域（由 MainGridLayout 的 Banner 自动渲染，此处为 fallback 标题） -->
+    <h1 class="sr-only">{title}</h1>
+    <ArchivePanel sortedPosts={sortedPostsList} client:load />
+  </div>
 </MainGridLayout>

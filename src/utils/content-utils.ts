@@ -1,7 +1,8 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import { getCategoryUrl } from "@utils/url-utils";
+import { buildTagGraphData, type TagGraphData } from "@utils/tag-graph-data";
+import { getCategoryUrl, getTagUrl } from "@utils/url-utils";
 
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts() {
@@ -118,6 +119,17 @@ export async function getCategoryList(): Promise<Category[]> {
 		});
 	}
 	return ret;
+}
+
+/**
+ * 获取标签关系图谱数据
+ *
+ * 遍历全部文章，构建标签节点（含文章数量）与标签共现边数据。
+ * 默认共现阈值 = 2（共现少于 2 次不显示连线）。
+ */
+export async function getTagGraphData(threshold = 2): Promise<TagGraphData> {
+	const posts = await getSortedPostsList();
+	return buildTagGraphData(posts, (tag) => getTagUrl(tag), threshold);
 }
 
 /**
