@@ -5,4 +5,6 @@
 	"assets": {
 		"directory": "./dist"
 	}
+	// wrangler.jsonc
+	"name": "fileflyblog",
 }
