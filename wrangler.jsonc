@@ -4,5 +4,7 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
 		"directory": "./dist"
-	}
+	},
+	// wrangler.jsonc
+	"name": "fileflyblog",
 }
