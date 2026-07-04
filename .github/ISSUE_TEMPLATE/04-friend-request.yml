@@ -1,0 +1,73 @@
+name: 友链申请
+description: 申请与本站互换友链
+title: "[友链申请]: "
+labels: ["友链申请"]
+assignees:
+  - CuteLeaf
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢申请友链！请先在本站友链页面（https://blog.tuuki.top/friends/）回链本站，再填写下方表单。
+
+        本站信息：
+        - 站点名称：月楼
+        - 站点链接：https://blog.tuuki.top/
+        - 站点头像：https://img.laplace.de5.net/file/blog/tx.webp
+        - 站点描述：海浪会来，生活总会继续
+        - 友链页面：https://blog.tuuki.top/friends/
+
+        提交后，GitHub Actions 会自动校验：
+        1. 你填写的友链页面能否正常打开
+        2. 页面中是否包含本站回链
+
+        校验通过后会自动写入 `src/config/friendsConfig.ts` 并关闭此 Issue；
+        校验失败会评论失败原因，并打上 `needs-update` 标签，修复后回复本 Issue 即可重新触发验证。
+  - type: input
+    id: site-name
+    attributes:
+      label: 网站名称
+      description: 你的站点名称
+      placeholder: 例如：我的小站
+    validations:
+      required: true
+  - type: input
+    id: site-url
+    attributes:
+      label: 网站链接
+      description: 你的站点首页 URL（请勿带尾斜杠）
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: input
+    id: friend-page-url
+    attributes:
+      label: 友链页面 URL
+      description: 你的站点友链页面 URL，需已添加本站回链
+      placeholder: https://example.com/friends/
+    validations:
+      required: true
+  - type: textarea
+    id: site-desc
+    attributes:
+      label: 网站描述
+      description: 一句话描述你的站点
+      placeholder: 记录技术与生活
+    validations:
+      required: false
+  - type: input
+    id: site-avatar
+    attributes:
+      label: 网站头像 URL
+      description: 头像直链，建议使用 https 链接
+      placeholder: https://example.com/avatar.png
+    validations:
+      required: false
+  - type: input
+    id: site-tag
+    attributes:
+      label: 网站标签
+      description: 友链分类标签（多个用英文逗号分隔）
+      placeholder: Blog
+    validations:
+      required: false

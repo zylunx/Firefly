@@ -1,0 +1,50 @@
+name: Friend Link Checker
+
+on:
+  issues:
+    types: [opened, reopened]
+  issue_comment:
+    types: [created]
+
+# 友链自动校验所需权限
+# - contents: write 用于提交 friendsConfig.ts
+# - issues: write 用于评论、打标签、关闭 Issue
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process:
+    # 只处理友链申请 Issue
+    if: |
+      (github.event_name == 'issues') ||
+      (github.event_name == 'issue_comment' && !github.event.issue.pull_request)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # 注意：不要在这里指定 version，因为 package.json 已声明 packageManager
+      # 否则会出现 "Multiple versions of pnpm specified"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Process friend request
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const path = require('node:path');
+            const handler = require(path.join(process.env.GITHUB_WORKSPACE, '.github/scripts/process-friend-request.cjs'));
+            await handler({ github, context, core });

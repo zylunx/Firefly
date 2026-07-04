@@ -58,6 +58,21 @@ const description =
           <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
             {title}
           </div>
+          <div class="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              id="apply-friend-btn"
+              class="apply-friend-btn group inline-flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium border border-(--line-divider) text-(--btn-content) hover:border-(--primary) hover:text-(--primary) hover:bg-(--primary)/10 transition-all duration-200 align-middle cursor-pointer"
+              title={i18n(I18nKey.applyFriend)}
+            >
+              <Icon
+                is:inline
+                name="material-symbols:person-add-rounded"
+                class="text-base transition-transform duration-200 group-hover:scale-110"
+              />
+              <span>{i18n(I18nKey.applyFriend)}</span>
+            </button>
+          </div>
         </div>
         {
           description && (
@@ -181,11 +196,60 @@ const description =
   </div>
 
   {friendsPageConfig.showCustomContent !== false && (
-    <div class="mt-4 card-base z-10 px-9 py-6 relative w-full">
-      <Markdown class="">
-        <Content />
-      </Markdown>
-    </div>
+    <dialog
+      id="how-to-apply-modal"
+      class="how-to-apply-modal m-auto p-0 w-full max-w-3xl max-h-[90vh] rounded-(--radius-large) bg-transparent overflow-visible backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+      aria-modal="true"
+    >
+      <div class="card-base relative w-full max-h-[90vh] flex flex-col overflow-hidden rounded-(--radius-large)">
+        <!-- 顶栏：标题 + 关闭按钮 -->
+        <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-(--line-divider) shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70 shrink-0">
+              <Icon is:inline name="material-symbols:person-add-rounded" class="text-[1.5rem]" />
+            </div>
+            <h2 class="text-xl font-bold text-neutral-900 dark:text-neutral-100 truncate">
+              {i18n(I18nKey.applyFriend)}
+            </h2>
+          </div>
+          <button
+            type="button"
+            class="how-to-apply-close shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-(--btn-content) hover:bg-black/10 dark:hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            <Icon is:inline name="material-symbols:close-rounded" class="text-lg" />
+          </button>
+        </div>
+        <!-- 内容区域 -->
+        <div class="overflow-y-auto px-6 py-5 grow">
+          <Markdown class="">
+            <Content />
+          </Markdown>
+        </div>
+        <!-- 底栏：继续申请按钮 -->
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-(--line-divider) shrink-0">
+          <button
+            type="button"
+            class="how-to-apply-close inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border border-(--line-divider) text-(--btn-content) hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            {i18n(I18nKey.cancel)}
+          </button>
+          <a
+            href="https://github.com/CuteLeaf/Firefly/issues/new?template=04-friend-request.yml&labels=%E5%8F%8B%E9%93%BE%E7%94%B3%E8%AF%B7"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="apply-friend-continue group inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-(--primary) text-white hover:bg-(--primary)/90 hover:shadow-lg transition-all"
+          >
+            <Icon
+              is:inline
+              name="material-symbols:arrow-forward-rounded"
+              class="text-base transition-transform duration-200 group-hover:translate-x-0.5"
+            />
+            <span>{i18n(I18nKey.continueApply)}</span>
+          </a>
+        </div>
+      </div>
+    </dialog>
   )}
 
   <!-- 评论区 -->
@@ -285,6 +349,53 @@ const description =
       }
       customElements.define("friend-filter", FriendFilter);
     }
+
+    // 友链申请说明弹框
+    (function () {
+      const btn = document.getElementById("apply-friend-btn");
+      const modal = document.getElementById("how-to-apply-modal");
+      if (!btn || !modal) return;
+
+      btn.addEventListener("click", () => {
+        if (typeof modal.showModal === "function") {
+          modal.showModal();
+        } else {
+          modal.setAttribute("open", "");
+        }
+        document.body.style.overflow = "hidden";
+      });
+
+      function closeModal() {
+        if (typeof modal.close === "function") {
+          modal.close();
+        } else {
+          modal.removeAttribute("open");
+        }
+        document.body.style.overflow = "";
+      }
+
+      modal.addEventListener("click", (e) => {
+        // 仅在点击 backdrop（dialog 本身而非内部内容）时关闭
+        if (e.target === modal) closeModal();
+      });
+
+      // 所有带 how-to-apply-close 类的元素（顶栏 X 按钮 + 底栏取消按钮）都能关闭
+      modal
+        .querySelectorAll(".how-to-apply-close")
+        .forEach((el) => el.addEventListener("click", closeModal));
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.hasAttribute("open")) {
+          // 原生 dialog 已处理 Escape，这里同步恢复 body 滚动
+          document.body.style.overflow = "";
+        }
+      });
+
+      // dialog 原生关闭事件（Escape 触发）同步恢复 body
+      modal.addEventListener("close", () => {
+        document.body.style.overflow = "";
+      });
+    })();
   </script>
 
   <style is:global>
@@ -292,6 +403,32 @@ const description =
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 0.75rem;
+    }
+    /* dialog 基础样式（兼容不支持 ::backdrop 的环境） */
+    dialog.how-to-apply-modal {
+      border: none;
+      background: transparent;
+    }
+    dialog.how-to-apply-modal:not([open]) {
+      display: none;
+    }
+    dialog.how-to-apply-modal::backdrop {
+      background-color: rgb(0 0 0 / 0.6);
+      backdrop-filter: blur(2px);
+    }
+    /* 进入动画 */
+    dialog.how-to-apply-modal[open] {
+      animation: how-to-apply-in 0.2s ease-out;
+    }
+    @keyframes how-to-apply-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
   </style>
 </MainGridLayout>
